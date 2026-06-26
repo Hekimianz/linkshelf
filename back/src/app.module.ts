@@ -10,6 +10,8 @@ import { ClickEvent } from './analytics/click-event.entity';
 import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { ProfilesModule } from './profiles/profiles.module';
+import { LinksModule } from './links/links.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -25,9 +27,20 @@ import { ProfilesModule } from './profiles/profiles.module';
         synchronize: false,
       }),
     }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        redis: {
+          host: config.get<string>('REDIS_HOST'),
+          port: config.get<number>('REDIS_PORT'),
+        },
+      }),
+    }),
     AuthModule,
     RedisModule,
     ProfilesModule,
+    LinksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
